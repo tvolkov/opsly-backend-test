@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -13,15 +14,18 @@ import reactor.core.publisher.Mono;
 public class AggregatorService {
 
     private final SocialNetworkResponseProducer socialNetworkResponseProducer;
-    private final List<String> socialMediaUrls = Arrays.asList("https://takehome.io/twitter", "https://takehome.io/facebook", "https://takehome.io/instagram");//todo make this externally configurable
+
+    @Value("#{'${social.network.paths}'.split(',')}")
+    private List<String> socialMediaPaths;
 
     @Autowired
     public AggregatorService(SocialNetworkResponseProducer socialNetworkResponseProducer) {
         this.socialNetworkResponseProducer = socialNetworkResponseProducer;
     }
 
-    public Mono<String> getResponse(){
-        final List<Mono<JSONObject>> collect = socialMediaUrls.stream().map(socialNetworkResponseProducer::getResponse).collect(Collectors.toList());
+    public Mono<String> getResponse() {
+        final List<Mono<JSONObject>> collect = socialMediaPaths.stream().map(socialNetworkResponseProducer::getResponse)
+                .collect(Collectors.toList());
         return Mono.zip(collect, this::combinator);
     }
 
