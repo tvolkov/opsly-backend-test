@@ -33,3 +33,8 @@ This should be a quick little task, but the client is paying us A Billion dollar
 Don't forget to `git push` regularly.
 
 Have fun!
+
+
+## implementation
+
+### I assume that the urls of social media a
