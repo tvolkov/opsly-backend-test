@@ -26,11 +26,6 @@ public class AggregatorService {
     public Mono<String> getResponse() {
         final List<Mono<JSONObject>> collect = socialMediaPaths.stream().map(socialNetworkResponseProducer::getResponse)
                 .collect(Collectors.toList());
-        return Mono.zip(collect, this::combinator);
-    }
-
-    private String combinator(Object[] objects) {
-        final List<JSONObject> collect = Arrays.stream(objects).map(object -> (JSONObject) object).collect(Collectors.toList());
-        return new JSONArray(collect).toString();
+        return Mono.zip(collect, objects -> new JSONArray(objects).toString());
     }
 }
