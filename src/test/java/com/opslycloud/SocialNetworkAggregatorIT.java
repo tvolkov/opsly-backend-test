@@ -27,7 +27,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @DirtiesContext
 @AutoConfigureWebTestClient
 @ContextConfiguration(initializers = {WireMockInitializer.class})
-public class SocialNetworkAggregatorTest {
+public class SocialNetworkAggregatorIT {
 
     @Autowired
     private WebTestClient webTestClient;
