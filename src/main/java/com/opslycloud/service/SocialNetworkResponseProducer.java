@@ -21,6 +21,9 @@ public class SocialNetworkResponseProducer {
     @Value("${social.network.response.timeout}")
     private long responseTimeout;
 
+    @Value("${social.network.response.timeout.msg}")
+    private String timeoutMsg;
+
     @Autowired
     public SocialNetworkResponseProducer(WebClient webClient, ResponseBodyProvider responseBodyProvider) {
         this.webClient = webClient;
@@ -34,7 +37,7 @@ public class SocialNetworkResponseProducer {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .flatMap(clientResponse -> handleResponse(clientResponse, path))
-                .timeout(Duration.ofSeconds(responseTimeout), Mono.just(new JSONObject(Map.of(path, "unable to get response because server is unavailable"))))
+                .timeout(Duration.ofSeconds(responseTimeout), Mono.just(new JSONObject(Map.of(path, timeoutMsg))))
                 .subscribeOn(Schedulers.elastic());
     }
 

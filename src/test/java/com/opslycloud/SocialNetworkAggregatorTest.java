@@ -93,6 +93,35 @@ public class SocialNetworkAggregatorTest {
                 .isNotFound();
     }
 
+    @Test
+    public void shouldReturnErrorMessageIfSocialNetworksTimeOut(){
+        stubWithTimeouts();
+        webTestClient
+                .get()
+                .uri("http://localhost:" + port + "/")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .json(buildTimeoutBody());
+    }
+
+    private void stubWithTimeouts() {
+        createSuccessStub("twitter");
+        createTimeoutStub("facebook");
+        createTimeoutStub("instagram");
+    }
+
+    private void createTimeoutStub(String path) {
+        this.wireMockServer.stubFor(
+                WireMock.get("/" + path)
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withFixedDelay(5000)
+                )
+        );
+    }
+
     private void stubOneUnsuccesfullResponse() {
         createSuccessStub("twitter");
         create500ErrorStub("facebook");
@@ -143,5 +172,10 @@ public class SocialNetworkAggregatorTest {
         return new JSONObject(Map.of("twitter", "[{\"username\":\"@GuyEndoreKaiser\",\"tweet\":\"If you live to be 100, you should make up some fake reason why, just to mess with people... like claim you ate a pinecone every single day.\"},{\"username\":\"@mikeleffingwell\",\"tweet\":\"STOP TELLING ME YOUR NEWBORN'S WEIGHT AND LENGTH I DON'T KNOW WHAT TO DO WITH THAT INFORMATION.\"}]",
                 "facebook", "{\"" + serverErrorMessage + "\":\"I am trapped in a social media factory send help\"}",
                 "instagram", "{\"" + clientErrorMessage + "\":\"404 page not found\"}")).toString();
+    }
+    private String buildTimeoutBody(){
+        return new JSONObject(Map.of("twitter", "[{\"username\":\"@GuyEndoreKaiser\",\"tweet\":\"If you live to be 100, you should make up some fake reason why, just to mess with people... like claim you ate a pinecone every single day.\"},{\"username\":\"@mikeleffingwell\",\"tweet\":\"STOP TELLING ME YOUR NEWBORN'S WEIGHT AND LENGTH I DON'T KNOW WHAT TO DO WITH THAT INFORMATION.\"}]",
+                "facebook", "unable to get response because server is unavailable",
+                "instagram", "unable to get response because server is unavailable")).toString();
     }
 }
