@@ -55,6 +55,7 @@ If I were to design a similar piece of software for a real-life use case I would
 ### Testing
 * `SocialNetworkAggregatorIT` is a collection of end-to-end test cases which cover most of the apps' logic. It employs `WireMock` to stub responses from different social networks. It uses `Spring`'s `WebTestClient` to make requests to the service.
 * I deliberately did not create any unit tests. The existing `SocialNetworkAggregatorIT` covers almost all the code so there is no need to have any other tests in this case.
+![intellij-coverage](intellij-coverage.png)
 
 ### How to run
 * (Java 11 required!) Just go to the project root and run `./gradlew bootRun`. Once app is running you can start hitting `http://localhost:3000`. 
