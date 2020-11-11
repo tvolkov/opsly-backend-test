@@ -1,4 +1,4 @@
-package com.opslycloud;
+package com.opslycloud.service;
 
 import java.time.Duration;
 import java.util.Map;
@@ -33,13 +33,13 @@ public class SocialNetworkResponseProducer {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .flatMap(clientResponse -> handleResponse(clientResponse, path))
-                .timeout(Duration.ofSeconds(responseTimeout))
+                .timeout(Duration.ofSeconds(responseTimeout), Mono.just(new JSONObject(Map.of(path, "unable to get response because server is unavailable"))))
                 .subscribeOn(Schedulers.elastic());
     }
 
     private Mono<JSONObject> handleResponse(ClientResponse clientResponse, String path){
         if (clientResponse.statusCode().is5xxServerError()) {
-            return Mono.just(new JSONObject(Map.of(path, "unable to get response due to service being unavailable")));
+            return Mono.just(new JSONObject(Map.of(path, "unable to get response due to server error")));
         } else if (clientResponse.statusCode().is4xxClientError()) {
             return Mono.just(new JSONObject(Map.of(path, "unable to get response as request is incorrect")));
         }
