@@ -1,7 +1,12 @@
 package com.opslycloud.service;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +28,17 @@ public class AggregatorService {
     }
 
     public Mono<String> getResponse() {
-        return Mono.zip(collectResponses(), objects -> new JSONArray(objects).toString());
+        return Mono.zip(collectResponses(), this::combineResponses);
+    }
+
+    private String combineResponses(Object[] objects){
+        JSONArray jsonArray = new JSONArray(objects);
+        Map<String, Object> map = new HashMap<>();
+        for (Object obj : jsonArray) {
+            JSONObject jsonObject = (JSONObject)obj;
+            map.putAll(jsonObject.toMap());
+        }
+        return new JSONObject(map).toString();
     }
 
     private List<Mono<JSONObject>> collectResponses() {

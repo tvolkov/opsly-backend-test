@@ -6,6 +6,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
@@ -52,7 +54,7 @@ public class SocialNetworkAggregatorTest {
     @Test
     public void shouldAggregateResposnesFromAllSocialNetworks() {
         stubAllSuccessfulResponses();
-        webTestClient.get().uri("http://localhost:" + port + "/").exchange().expectStatus().isOk();
+        webTestClient.get().uri("http://localhost:" + port + "/").exchange().expectStatus().isOk().expectBody().json(buildSuccessfulBody());
     }
 
     private void stubAllSuccessfulResponses() {
@@ -67,5 +69,9 @@ public class SocialNetworkAggregatorTest {
                         .withBody(socialNetworkResponseStubs.get(path))
                 )
         );
+    }
+
+    private String buildSuccessfulBody(){
+        return new JSONObject(socialNetworkResponseStubs).toString();
     }
 }
