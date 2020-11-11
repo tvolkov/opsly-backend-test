@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class SocialNetworkResponseProducer {
@@ -32,7 +33,8 @@ public class SocialNetworkResponseProducer {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .flatMap(clientResponse -> handleResponse(clientResponse, path))
-                .timeout(Duration.ofSeconds(responseTimeout));
+                .timeout(Duration.ofSeconds(responseTimeout))
+                .subscribeOn(Schedulers.elastic());
     }
 
     private Mono<JSONObject> handleResponse(ClientResponse clientResponse, String path){
