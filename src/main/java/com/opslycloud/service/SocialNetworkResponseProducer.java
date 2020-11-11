@@ -21,9 +21,8 @@ public class SocialNetworkResponseProducer {
     private long responseTimeout;
 
     @Autowired
-    public SocialNetworkResponseProducer(@Value("${social.network.base.url}") String baseUrl,
-            WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+    public SocialNetworkResponseProducer(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     public Mono<JSONObject> getResponse(final String path){
