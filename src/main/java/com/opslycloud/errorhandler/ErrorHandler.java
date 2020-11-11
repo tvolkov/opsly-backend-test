@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -40,8 +41,16 @@ public class ErrorHandler extends AbstractErrorWebExceptionHandler {
 
     private Mono<ServerResponse> renderErrorResponse(ServerRequest serverRequest) {
         Map<String, Object> errorAttributes = getErrorAttributes(serverRequest, ErrorAttributeOptions.defaults());
-        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ServerResponse.status(getStatusCode(serverRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(errorAttributes));
+    }
+
+    private HttpStatus getStatusCode(ServerRequest serverRequest){
+        Throwable throwable = getError(serverRequest);
+        if (throwable instanceof ResponseStatusException) {
+            return ((ResponseStatusException) throwable).getStatus();
+        }
+        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 }
