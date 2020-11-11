@@ -38,4 +38,5 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
+    testCompile('com.github.tomakehurst:wiremock:2.27.2')
 }
