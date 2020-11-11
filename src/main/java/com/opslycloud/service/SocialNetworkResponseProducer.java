@@ -16,13 +16,15 @@ import reactor.core.scheduler.Schedulers;
 public class SocialNetworkResponseProducer {
 
     private final WebClient webClient;
+    private final ResponseBodyProvider responseBodyProvider;
 
     @Value("${social.network.response.timeout}")
     private long responseTimeout;
 
     @Autowired
-    public SocialNetworkResponseProducer(WebClient webClient) {
+    public SocialNetworkResponseProducer(WebClient webClient, ResponseBodyProvider responseBodyProvider) {
         this.webClient = webClient;
+        this.responseBodyProvider = responseBodyProvider;
     }
 
     public Mono<JSONObject> getResponse(final String path){
@@ -37,13 +39,6 @@ public class SocialNetworkResponseProducer {
     }
 
     private Mono<JSONObject> handleResponse(ClientResponse clientResponse, String path){
-        if (clientResponse.statusCode().is5xxServerError()) {
-            return Mono.just(new JSONObject(Map.of(path, "unable to get response due to server error")));
-        } else if (clientResponse.statusCode().is4xxClientError()) {
-            return Mono.just(new JSONObject(Map.of(path, "unable to get response as request is incorrect")));
-        }
-
-        return clientResponse.bodyToMono(String.class).map(response -> new JSONObject(Map.of(path, response)));
+        return clientResponse.bodyToMono(String.class).map(response -> new JSONObject(Map.of(path, responseBodyProvider.getResponseBody(response, clientResponse))));
     }
-
 }

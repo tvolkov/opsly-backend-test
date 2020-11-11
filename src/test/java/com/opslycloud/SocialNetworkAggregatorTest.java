@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
@@ -42,6 +41,12 @@ public class SocialNetworkAggregatorTest {
     @Value("#{'${social.network.paths}'.split(',')}")
     private List<String> socialNetworkPaths;
 
+    @Value("${error.msg.server}")
+    private String serverErrorMessage;
+
+    @Value("${error.msg.client}")
+    private String clientErrorMessage;
+
     @AfterEach
     public void afterEach(){
         this.wireMockServer.resetAll();
@@ -54,7 +59,33 @@ public class SocialNetworkAggregatorTest {
     @Test
     public void shouldAggregateResposnesFromAllSocialNetworks() {
         stubAllSuccessfulResponses();
-        webTestClient.get().uri("http://localhost:" + port + "/").exchange().expectStatus().isOk().expectBody().json(buildSuccessfulBody());
+        webTestClient
+                .get()
+                .uri("http://localhost:" + port + "/")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .json(buildSuccessfulBody());
+    }
+
+    @Test
+    public void shouldAggregateResponsesWhenNotAllAreSuccessful() {
+        stubOneUnsuccesfullResponse();
+        webTestClient
+                .get()
+                .uri("http://localhost:" + port + "/")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .json(buildOneSuccessfulBody());
+    }
+
+    private void stubOneUnsuccesfullResponse() {
+        createSuccessStub("twitter");
+        create500ErrorStub("facebook");
+        create404ErrorStub("instagram");
     }
 
     private void stubAllSuccessfulResponses() {
@@ -71,7 +102,35 @@ public class SocialNetworkAggregatorTest {
         );
     }
 
+    private void create404ErrorStub(String path){
+        this.wireMockServer.stubFor(
+                WireMock.get("/" + path)
+                        .willReturn(aResponse()
+                                .withStatus(404)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("404 page not found")
+                        )
+        );
+    }
+
+    private void create500ErrorStub(String path){
+        this.wireMockServer.stubFor(
+                WireMock.get("/" + path)
+                        .willReturn(aResponse()
+                                .withStatus(500)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("I am trapped in a social media factory send help")
+                        )
+        );
+    }
+
     private String buildSuccessfulBody(){
         return new JSONObject(socialNetworkResponseStubs).toString();
+    }
+
+    private String buildOneSuccessfulBody() {
+        return new JSONObject(Map.of("twitter", "[{\"username\":\"@GuyEndoreKaiser\",\"tweet\":\"If you live to be 100, you should make up some fake reason why, just to mess with people... like claim you ate a pinecone every single day.\"},{\"username\":\"@mikeleffingwell\",\"tweet\":\"STOP TELLING ME YOUR NEWBORN'S WEIGHT AND LENGTH I DON'T KNOW WHAT TO DO WITH THAT INFORMATION.\"}]",
+                "facebook", "{\"" + serverErrorMessage + "\":\"I am trapped in a social media factory send help\"}",
+                "instagram", "{\"" + clientErrorMessage + "\":\"404 page not found\"}")).toString();
     }
 }
