@@ -15,7 +15,7 @@ public class AggregatorService {
     private final SocialNetworkResponseProducer socialNetworkResponseProducer;
 
     @Value("#{'${social.network.paths}'.split(',')}")
-    private List<String> socialMediaPaths;
+    private List<String> socialNetworkPaths;
 
     @Autowired
     public AggregatorService(SocialNetworkResponseProducer socialNetworkResponseProducer) {
@@ -27,7 +27,7 @@ public class AggregatorService {
     }
 
     private List<Mono<JSONObject>> collectResponses() {
-        return socialMediaPaths.stream().map(socialNetworkResponseProducer::getResponse)
+        return socialNetworkPaths.stream().map(socialNetworkResponseProducer::getResponse)
                 .collect(Collectors.toList());
     }
 }
