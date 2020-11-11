@@ -14,17 +14,14 @@ import reactor.core.publisher.Mono;
 @Component
 public class SocialNetworkResponseProducer {
 
-    private final SocialNetworkNameExtractor socialNetworkNameExtractor;
     private final WebClient webClient;
 
     @Value("${social.network.response.timeout}")
     private long responseTimeout;
 
     @Autowired
-    public SocialNetworkResponseProducer(SocialNetworkNameExtractor socialNetworkNameExtractor,
-            @Value("${social.network.base.url}") String baseUrl,
+    public SocialNetworkResponseProducer(@Value("${social.network.base.url}") String baseUrl,
             WebClient.Builder webClientBuilder) {
-        this.socialNetworkNameExtractor = socialNetworkNameExtractor;
         this.webClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
