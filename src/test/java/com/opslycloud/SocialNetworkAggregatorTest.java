@@ -82,6 +82,17 @@ public class SocialNetworkAggregatorTest {
                 .json(buildOneSuccessfulBody());
     }
 
+    @Test
+    public void shouldReturn404ErrorIfUrlIsIncorrect(){
+        stubAllSuccessfulResponses();
+        webTestClient
+                .get()
+                .uri("http://localhost:" + port + "/incorrectpath")
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
     private void stubOneUnsuccesfullResponse() {
         createSuccessStub("twitter");
         create500ErrorStub("facebook");
