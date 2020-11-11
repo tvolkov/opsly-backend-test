@@ -17,6 +17,9 @@ public class SocialNetworkResponseProducer {
     private final SocialNetworkNameExtractor socialNetworkNameExtractor;
     private final WebClient webClient;
 
+    @Value("${social.network.response.timeout}")
+    private long responseTimeout;
+
     @Autowired
     public SocialNetworkResponseProducer(SocialNetworkNameExtractor socialNetworkNameExtractor,
             @Value("${social.network.base.url}") String baseUrl,
@@ -32,7 +35,7 @@ public class SocialNetworkResponseProducer {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .flatMap(clientResponse -> handleResponse(clientResponse, path))
-                .timeout(Duration.ofSeconds(3));//todo make configurable
+                .timeout(Duration.ofSeconds(responseTimeout));
     }
 
     private Mono<JSONObject> handleResponse(ClientResponse clientResponse, String path){
